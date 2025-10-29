@@ -34,7 +34,8 @@ import os
 import tempfile
 import json
 from typing import List
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
+
 
 
 
