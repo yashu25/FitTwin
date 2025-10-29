@@ -1,17 +1,8 @@
 import streamlit as st
-from transformers import pipeline
-from langchain_community.llms import HuggingFacePipeline
-import openai
+import requests
 
 # -------------------- ⚙️ PAGE SETUP --------------------
 st.set_page_config(page_title="FitTwin AI", page_icon="💪", layout="wide")
-
-st.markdown("""
-    <style>
-    .main {background-color:#0e1117;color:#FAFAFA;}
-    .stTextInput, .stTextArea, .stButton>button {border-radius:12px;}
-    </style>
-""", unsafe_allow_html=True)
 
 st.title("💪 FitTwin — Your AI Fitness Coach")
 
@@ -24,47 +15,40 @@ else:
 
 # -------------------- 🔑 API KEYS --------------------
 with st.sidebar:
-    st.header("🔐 API Keys")
-    openai_key = st.text_input("Enter OpenAI API Key (optional)", type="password")
-    hf_key = st.text_input("Enter Hugging Face API Token", type="password")
+    st.header("🔐 API Key (Hugging Face)")
+    hf_key = st.text_input("Enter your Hugging Face Access Token", type="password")
     st.markdown("---")
     st.write("💬 Ask about: Nutrition, Workout, Biomechanics, Mobility, Physio stretches")
 
-# -------------------- 🧠 HUGGINGFACE MODEL --------------------
-@st.cache_resource
-def load_hf_model():
-    generator = pipeline(
-        "text-generation",
-        model="tiiuae/falcon-7b-instruct",
-        tokenizer="tiiuae/falcon-7b-instruct",
-        max_new_tokens=512,
-        temperature=0.6
-    )
-    return HuggingFacePipeline(pipeline=generator)
+# -------------------- 🤖 FUNCTION --------------------
+def fit_twin_answer(query, hf_key):
+    if not hf_key:
+        return "⚠️ Please enter your Hugging Face API Token in the sidebar."
 
-hf_llm = load_hf_model()
+    headers = {"Authorization": f"Bearer {hf_key}"}
+    API_URL = "https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct"
+    payload = {"inputs": f"You are FitTwin, a certified coach in nutrition, biomechanics and mobility.\nUser query: {query}"}
 
-# -------------------- 🧬 MULTIMODAL FUNCTION --------------------
-def fit_twin_answer(query, image=None):
-    if image:
-        # Future multimodal handling (e.g., image captioning / pose check)
-        return "📸 Multimodal analysis coming soon — please describe your image for now!"
-    else:
-        try:
-            return hf_llm(f"You are FitTwin, a certified coach in nutrition, biomechanics and mobility.\nUser query: {query}")
-        except Exception as e:
-            return f"⚠️ Model Error: {e}"
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        if response.status_code == 200:
+            data = response.json()
+            return data[0]["generated_text"]
+        else:
+            return f"⚠️ API Error: {response.text}"
+    except Exception as e:
+        return f"⚠️ Request Error: {e}"
 
 # -------------------- 💬 CHAT UI --------------------
 st.markdown("### 🤖 Chat with FitTwin")
-query = st.text_area("Ask FitTwin anything:", placeholder="e.g., Best pre-workout meal for fat loss?")
-image = st.file_uploader("Optional: Upload an image (for future posture analysis)", type=["jpg","png"])
+query = st.text_area("Ask FitTwin anything:", placeholder="e.g., Best post-workout protein meal?")
+image = st.file_uploader("Optional: Upload an image (future posture analysis)", type=["jpg","png"])
 
 if st.button("💪 Get Answer"):
     if not query.strip():
         st.warning("Please enter a question first.")
     else:
         with st.spinner("Thinking..."):
-            answer = fit_twin_answer(query, image)
+            answer = fit_twin_answer(query, hf_key)
             st.success("✅ Answer:")
             st.write(answer)
