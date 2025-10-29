@@ -13,4 +13,8 @@ openai
 requests
 pillow
 streamlit
+streamlit
+transformers
+torch
+langchain-community
 
