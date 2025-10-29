@@ -34,7 +34,8 @@ import os
 import tempfile
 import json
 from typing import List
-from langchain.schema import Document
+from langchain.docstore.document import Document
+
 
 
 # --- Third-party libraries used by the app ---
