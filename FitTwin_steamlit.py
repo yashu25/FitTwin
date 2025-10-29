@@ -33,6 +33,9 @@ from typing import List, Optional
 import os
 import tempfile
 import json
+from typing import List
+from langchain.schema import Document
+
 
 # --- Third-party libraries used by the app ---
 # langchain, openai, faiss, serpapi, pypdf
