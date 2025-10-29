@@ -1,6 +1,6 @@
 streamlit
 openai
-langchain
+langchain==0.1.20
 faiss-cpu
 pypdf
 serpapi
