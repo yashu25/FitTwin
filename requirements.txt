@@ -6,3 +6,11 @@ langchain-core
 faiss-cpu
 pypdf
 serpapi
+langchain
+langchain-community
+huggingface_hub
+openai
+requests
+pillow
+streamlit
+
